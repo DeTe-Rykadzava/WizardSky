@@ -10,8 +10,8 @@ public class PlayerMovement : MonoBehaviour
 {
     // Start is called before the first frame update
     [SerializeField] private CharacterController _characterController;
+    [SerializeField] private Transform camera;
     [SerializeField] private PlayerMovementSpecifications _specification;
-    [SerializeField] private Transform _camera;
     
     private int _countAbleJumps;
     
@@ -20,9 +20,11 @@ public class PlayerMovement : MonoBehaviour
     private bool _isCharacterControllerNull;
     
     private Vector3 _verticalVelocity = Vector3.zero;
-    
+    private bool _isCameraNull;
+
     void Start()
     {
+        _isCameraNull = camera == null;
         _isCharacterControllerNull = _characterController == null;
         _inputManager = InputManager.CurrentInput;
         _countAbleJumps = _specification.MaxCountJumps;
@@ -33,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
     {
         _inputManager.Update();
     }
-
+    
     private void FixedUpdate()
     {
         if (_isCharacterControllerNull)
@@ -59,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
             
             _characterController.Move(move * 0.75f * Time.fixedDeltaTime * _specification.Speed);
         }
-    
+        
         if (_inputManager.Jump && _countAbleJumps != 0)
         {
             Debug.Log("Jump");
@@ -75,5 +77,14 @@ public class PlayerMovement : MonoBehaviour
         
         _characterController.Move(_verticalVelocity * Time.fixedDeltaTime);
         
+    }
+
+    private void LateUpdate()
+    {
+        if(_isCameraNull)
+            return;
+
+        var cameraRotation = camera.rotation.eulerAngles;
+        transform.rotation = Quaternion.Euler(0, cameraRotation.y, 0);
     }
 }
