@@ -13,6 +13,10 @@ public class MainMenuManager : MonoBehaviour
 
     public void ExitGame()
     {
+#if UNITY_EDITOR
+        Debug.Log("Exit");
+        return;
+#endif
         Environment.Exit(0);
     }
 }

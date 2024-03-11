@@ -1,51 +1,66 @@
+using Camera;
 using UnityEngine;
 
-    public class ThirdPersonPlayerFollow : MonoBehaviour, IUpdateable, IState
+    public class ThirdPersonPlayerFollow : ILateUpdate, IState
     {
-        private Transform _target;
-        private Transform _source;
-        private float distance = 2f;
-        private Vector3 offset ;
-        private float mouseSens = 1f;
-        private readonly AMouseInput _mouseManager;
+        private readonly Transform _target;
+        private readonly Transform _source;
+
+        private const float MinDistance = 2f;
+        private const float MaxDistance = 2f;
+        private const float MouseSens = 1f;
+        private const float VerticalAngleLimit = 80;
+        
+        private float _distance = 2f;
+        private Vector3 offset = new Vector3(0,2, -2);
+        
+        private float verticalRotation = 0f;
+
+        private readonly AMouseInput _mouseInput;
+        private bool _isTargetNull;
+        private bool _isSourceNull;
 
         public ThirdPersonPlayerFollow(Transform target, Transform source)
         {
             _target = target;
             _source = source;
-            _mouseManager = InputManager.CurrentMouseInput;
+            _mouseInput = InputManager.CurrentMouseInput;
+            CheckVariable();
         }
 
-        public void Update()
+        private void CheckVariable()
         {
-            var targetPosition = _target.position;
-            
-            _mouseManager.Update();
-            
-            var mouseX = _mouseManager.MouseX * mouseSens * Time.deltaTime;
-            var mouseY = _mouseManager.MouseY * mouseSens * Time.deltaTime;
+            _isSourceNull = _source == null;
+            _isTargetNull = _target == null;
+        }
 
-            distance += _mouseManager.MouseWheel;
 
-            distance = Mathf.Clamp(distance, 2f, 5f); 
-            
-            var rotatedOffsetXZOsX = offset.x * Mathf.Cos(mouseX) 
-                                         - offset.z * Mathf.Sin(mouseX);
-            var rotatedOffsetXZOsY = offset.x * Mathf.Sin(mouseX) 
-                                         + offset.z * Mathf.Cos(mouseX);
-            var rotatedOffsetXZ = new Vector3(rotatedOffsetXZOsX, offset.y, rotatedOffsetXZOsY);
-            offset = rotatedOffsetXZ;
+        public void LateUpdate()
+        {
+            _mouseInput.Update();
+           
+            if (_isTargetNull || _isSourceNull)
+            {
+                return;
+            }
 
-            var rotatedOffsetYZOsZ = offset.y * Mathf.Sin(mouseY) 
-                                     + offset.z * Mathf.Cos(mouseY);
-            var rotatedOffsetYZOsY = offset.y * Mathf.Cos(mouseY) 
-                                     - offset.z * Mathf.Sin(mouseY);
-            var rotatedOffsetYZ = new Vector3(offset.x, rotatedOffsetYZOsY, rotatedOffsetYZOsZ);
-            offset = rotatedOffsetYZ;
-            var newPos = targetPosition + offset;
-            var newPosDistanceV = newPos - targetPosition;
-            _source.position = targetPosition + Vector3.ClampMagnitude(newPosDistanceV, distance);
-            
-            _source.LookAt(targetPosition); 
+            var mouseX = _mouseInput.MouseX * MouseSens ;
+            var mouseY = _mouseInput.MouseY * MouseSens ;
+
+            _distance += _mouseInput.MouseWheel;
+
+            _distance = Mathf.Clamp(_distance, MinDistance, MaxDistance);
+
+            verticalRotation -= mouseY;
+            verticalRotation = Mathf.Clamp(verticalRotation, -VerticalAngleLimit, VerticalAngleLimit);
+
+            var rotation = Quaternion.Euler(mouseY, mouseX, 0) ;
+            offset = rotation * offset;
+
+            var position = _target.position;
+            var desiredPosition = position + offset * _distance;
+
+            _source.position = desiredPosition;
+            _source.LookAt(position);
         }
     }

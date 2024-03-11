@@ -7,5 +7,7 @@
 
         public float MouseWheel { get; protected set; }
 
+        public bool MouseMiddleButton { get; protected set; }
+
         public abstract void Update();
     }

@@ -1,10 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
-using DefaultNamespace;
-using UnityEngine;
+using JetBrains.Annotations;
 
 public class InputManager
 {
-    public static AInput CurrentInput => new KeyBoardInput();
-    public static AMouseInput CurrentMouseInput => new MouseInput();
+    [CanBeNull] private static AInput _currentInput = null;
+    [CanBeNull] private static AMouseInput _currentMouseInput = null;
+
+    public static AInput CurrentInput => _currentInput ??= new KeyBoardInput();
+    public static AMouseInput CurrentMouseInput => _currentMouseInput ??= new MouseInput();
 }

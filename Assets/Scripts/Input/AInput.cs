@@ -10,9 +10,8 @@ public abstract class AInput
     public float ForwardBack { get; protected set; }
 
     public bool Jump { get; protected set; } = false;
-    
-    public bool Sprint { get; protected set; } = false;
 
+    public bool Sprint { get; protected set; } = false;
    
 
     public abstract void Update();

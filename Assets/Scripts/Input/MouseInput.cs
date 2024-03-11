@@ -8,5 +8,6 @@ using UnityEngine;
             MouseX = Input.GetAxis("Mouse X");
             MouseY = Input.GetAxis("Mouse Y");
             MouseWheel = Input.GetAxis("Mouse ScrollWheel");
+            MouseMiddleButton = false || Input.GetMouseButtonDown(2);
         }
     }

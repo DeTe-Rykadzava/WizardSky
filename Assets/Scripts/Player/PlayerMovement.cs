@@ -16,17 +16,19 @@ public class PlayerMovement : MonoBehaviour
     private int _countAbleJumps;
     
     private AInput _inputManager;
+    private AMouseInput _mouseInputManager;
     
     private bool _isCharacterControllerNull;
     
     private Vector3 _verticalVelocity = Vector3.zero;
     private bool _isCameraNull;
-
+    
     void Start()
     {
         _isCameraNull = camera == null;
         _isCharacterControllerNull = _characterController == null;
         _inputManager = InputManager.CurrentInput;
+        _mouseInputManager = InputManager.CurrentMouseInput;
         _countAbleJumps = _specification.MaxCountJumps;
     }
 
@@ -34,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         _inputManager.Update();
+        _mouseInputManager.Update();
     }
     
     private void FixedUpdate()
@@ -45,11 +48,11 @@ public class PlayerMovement : MonoBehaviour
         {
             if (_verticalVelocity.y < 0)
                 _verticalVelocity.y = 0f;
-            // Debug.Log("Move");
             _countAbleJumps = _specification.MaxCountJumps;
-            var move = new Vector3(_inputManager.LeftRight, 0, _inputManager.ForwardBack);
+            var move = transform.forward * _inputManager.ForwardBack;
+            
             if(_inputManager.Sprint)
-                _characterController.Move(move * Time.fixedDeltaTime * (_specification.Speed + _specification.SprintSpeed));
+                _characterController.Move( move * Time.fixedDeltaTime * (_specification.Speed + _specification.SprintSpeed));
             else
                 _characterController.Move(move * Time.fixedDeltaTime * _specification.Speed);
         }
@@ -84,6 +87,9 @@ public class PlayerMovement : MonoBehaviour
         if(_isCameraNull)
             return;
 
+        if(_mouseInputManager.MouseMiddleButton)
+            return;
+        
         var cameraRotation = camera.rotation.eulerAngles;
         transform.rotation = Quaternion.Euler(0, cameraRotation.y, 0);
     }
